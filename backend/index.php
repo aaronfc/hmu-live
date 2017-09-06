@@ -6,8 +6,8 @@ $cache->load("folder=cache/");
 
 // Warmup
 if (!$cache->exists('last_timestamp')) $cache->set('last_timestamp', time());
-if (!$cache->exists('likes')) $$cache->set('likes', []);
-if (!$cache->exists('dislikes')) $$cache->set('dislikes', []);
+if (!$cache->exists('likes')) $cache->set('likes', []);
+if (!$cache->exists('dislikes')) $cache->set('dislikes', []);
 
 $f3->route('POST /like',
     function() {
