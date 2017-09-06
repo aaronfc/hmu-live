@@ -20,9 +20,9 @@ class Actions extends Component {
   render() {
     return (
       <p>
-        <button type="button" className="btn" onClick={this._like}>Like</button> &nbsp;
-        <button type="button" className="btn" onClick={this._dislike}>Dislike</button> &nbsp;
-        <button type="button" className="btn" onClick={this._reset}>Reset</button>
+        <button type="button" className="btn btn-primary" onClick={this._like}>Like</button> &nbsp;
+        <button type="button" className="btn btn-primary" onClick={this._dislike}>Dislike</button> &nbsp;
+        <button type="button" className="btn btn-primary" onClick={this._reset}>Reset</button>
       </p>
     );
   }
