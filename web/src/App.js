@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import Counter from './Counter.js'
 import Actions from './Actions.js'
+import Hearts from './Hearts.js'
 
 class App extends Component {
 
@@ -15,6 +16,7 @@ class App extends Component {
         tick: Date.now()
       }
     };
+    this.hearts = undefined;
   }
 
   componentDidMount() { // Best place to make NW requests
@@ -28,7 +30,7 @@ class App extends Component {
         this.setState({
           mostRecentData: d
         })
-        console.log(d);
+        if (d.likes > 0) { this.hearts._draw(d.likes); }
       })
   }
 
@@ -41,6 +43,9 @@ class App extends Component {
         </div>
         <p className="App-intro">
           <Counter remaining={this.state.mostRecentData.remaining}/>
+        </p>
+        <p>
+          <Hearts ref={instance => {this.hearts = instance;}}/>
         </p>
         <p>
           Likes: {this.state.mostRecentData.likes} | Dislikes: {this.state.mostRecentData.dislikes}
