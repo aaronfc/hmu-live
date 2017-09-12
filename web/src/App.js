@@ -9,7 +9,12 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      mostRecentData: {
+      apiKey: null,
+      isAdmin: false,
+      //apiKey: 'def0734f12ed2dad8ff26bfb8967569815f40c31',
+      //isAdmin: true,
+      lastUpdate: {
+        status: "unknown",
         likes: 0,
         dislikes: 0,
         remaining: undefined,
@@ -24,15 +29,24 @@ class App extends Component {
   }
 
   _loadData() {
-    fetch("http://localhost:8080/events/" + this.state.mostRecentData.tick)
+    fetch("http://localhost:8080/updates/" + this.state.lastUpdate.tick)
       .then(d => d.json())
       .then(d => {
-        this.setState({
-          mostRecentData: d
-        })
+        this.setState({lastUpdate: d})
         if (d.likes > 0) { this.hearts._draw(d.likes); }
       })
   }
+
+  _login() {
+      var password = prompt("Password?");
+      if (password) {
+        fetch("http://localhost:8080/login", {method: "POST", body: JSON.stringify({username: 'admin', password: password})})
+        .then(function(res){ if (!res.ok) { throw Error(res.statusText) } return res.json(); })
+        .then(function(data) { this.state.apiKey = data.apiKey; this.state.isAdmin = true; }.bind(this))
+        .catch(function(error) { alert('Wrong login information.'); console.log(error); });
+      }
+  }
+
 
   render() {
 
@@ -42,16 +56,16 @@ class App extends Component {
           <h2><i className="fa fa-circle text-danger Blink"></i> HMU Live</h2>
         </div>
         <p className="App-intro">
-          <Counter remaining={this.state.mostRecentData.remaining}/>
+          <Counter remaining={this.state.lastUpdate.remaining}/>
         </p>
         <p>
-          <Hearts ref={instance => {this.hearts = instance;}}/>
+          <Hearts ref={instance => {this.hearts = instance}}/>
         </p>
         <p>
-          Likes: {this.state.mostRecentData.likes} | Dislikes: {this.state.mostRecentData.dislikes}
+          Likes: {this.state.lastUpdate.likes} | Dislikes: {this.state.lastUpdate.dislikes}
         </p>
         <p>
-          <Actions/>
+          <Actions status={this.state.lastUpdate.status} isAdmin={this.state.isAdmin} loginCallback={this._login.bind(this)} apiKey={this.state.apiKey}/>
         </p>
       </div>
     );
