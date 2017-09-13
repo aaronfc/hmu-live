@@ -11,8 +11,6 @@ class App extends Component {
     this.state = {
       apiKey: null,
       isAdmin: false,
-      //apiKey: 'def0734f12ed2dad8ff26bfb8967569815f40c31',
-      //isAdmin: true,
       lastUpdate: {
         status: "unknown",
         likes: 0,
