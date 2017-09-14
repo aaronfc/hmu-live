@@ -3,6 +3,7 @@ import './App.css';
 import Counter from './Counter.js'
 import Actions from './Actions.js'
 import Hearts from './Hearts.js'
+import { API_ENDPOINT } from './config';
 
 class App extends Component {
 
@@ -27,7 +28,7 @@ class App extends Component {
   }
 
   _loadData() {
-    fetch("http://localhost:8080/updates/" + this.state.lastUpdate.tick)
+    fetch(API_ENDPOINT + "/updates/" + this.state.lastUpdate.tick)
       .then(d => d.json())
       .then(d => {
         this.setState({lastUpdate: d})
@@ -38,7 +39,7 @@ class App extends Component {
   _login() {
       var password = prompt("Password?");
       if (password) {
-        fetch("http://localhost:8080/login", {method: "POST", body: JSON.stringify({username: 'admin', password: password})})
+        fetch(API_ENDPOINT + "/login", {method: "POST", body: JSON.stringify({username: 'admin', password: password})})
         .then(function(res){ if (!res.ok) { throw Error(res.statusText) } return res.json(); })
         .then(function(data) { this.state.apiKey = data.apiKey; this.state.isAdmin = true; }.bind(this))
         .catch(function(error) { alert('Wrong login information.'); console.log(error); });

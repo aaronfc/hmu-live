@@ -1,0 +1,4 @@
+/build
+/db/db.sqlite
+/node_modules
+/vendor
