@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import Counter from './Counter.js'
 import Actions from './Actions.js'
+import Results from './Results.js'
 import Hearts from './Hearts.js'
 import { API_ENDPOINT } from './config';
 
@@ -48,8 +49,6 @@ class App extends Component {
       }
   }
 
-
-
   render() {
 
     return (
@@ -61,13 +60,13 @@ class App extends Component {
           <Counter remaining={this.state.lastUpdate.remaining}/>
         </div>
         <div>
-          Likes: {this.state.lastUpdate.likes} | Dislikes: {this.state.lastUpdate.dislikes}
-        </div>
-        <div>
           <Hearts ref={instance => {this.hearts = instance}}/>
         </div>
         <div className="actions">
           <Actions status={this.state.lastUpdate.status} isAdmin={this.state.isAdmin} loginCallback={this._login.bind(this)} apiKey={this.state.apiKey}/>
+        </div>
+        <div className="actions">
+          <Results isAdmin={this.state.isAdmin} apiKey={this.state.apiKey}/>
         </div>
       </div>
     );

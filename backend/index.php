@@ -145,6 +145,23 @@ $f3->route('GET /updates/@since',
 	echo json_encode($output);
     }
 );
+
+$f3->route('GET /results', function($f3, $params) {
+	if (!$f3->exists('HEADERS.Authentication') || $f3->get('HEADERS.Authentication') !== HIDDEN_KEY) {
+		$f3->error(401);
+		return;
+	}
+	$db = getDB();
+	$rows = $db->exec(
+		'SELECT id, from_unixtime(started_at) as start_time, from_unixtime(ended_at) as end_time, likes, dislikes
+		FROM presentation
+		WHERE ended_at is not null
+		ORDER BY id DESC'
+	);
+
+	echo json_encode($rows);
+});
+
 $f3->route('POST /login',
     function($f3, $params) {
 	// Wrong password

@@ -49,6 +49,16 @@ export const api = {
           ).then(() => console.log("Pause sent!"));
       },
 
+      results: (callback) => {
+          fetch(
+            API_ENDPOINT + "/results",
+            {
+              method: "GET",
+              headers: { Authentication: apiKey }
+            }
+          ).then(d => d.json()).then(callback);
+      },
+
       resume: () => {
           fetch(
             API_ENDPOINT + "/resume",
