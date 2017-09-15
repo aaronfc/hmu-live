@@ -4,6 +4,7 @@ import Counter from './Counter.js'
 import Actions from './Actions.js'
 import Results from './Results.js'
 import Hearts from './Hearts.js'
+import Poops from './Poops.js'
 import { API_ENDPOINT } from './config';
 
 class App extends Component {
@@ -22,6 +23,7 @@ class App extends Component {
       }
     };
     this.hearts = undefined;
+    this.poops = undefined;
   }
 
   componentDidMount() { // Best place to make NW requests
@@ -34,6 +36,7 @@ class App extends Component {
       .then(d => {
         this.setState({lastUpdate: d})
         if (d.likes > 0) { this.hearts._draw(d.likes); }
+        if (d.dislikes > 0) { this.poops._draw(d.dislikes); }
       })
   }
 
@@ -61,6 +64,7 @@ class App extends Component {
         </div>
         <div>
           <Hearts ref={instance => {this.hearts = instance}}/>
+          <Poops ref={instance => {this.poops = instance}}/>
         </div>
         <div className="actions">
           <Actions status={this.state.lastUpdate.status} isAdmin={this.state.isAdmin} loginCallback={this._login.bind(this)} apiKey={this.state.apiKey}/>
