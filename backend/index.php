@@ -1,11 +1,10 @@
 <?php
 require '../vendor/autoload.php';
 $f3 = \Base::instance();
-$env = $_ENV;
 
-if (isset($env['SKIP_CONFIG_FILE'])) {
+if (getenv('SKIP_CONFIG_FILE')) {
 	foreach(['LIMIT_MAX_ITEMS_COUNT', 'LIMIT_MAX_ITEMS_AGE', 'HIDDEN_SECRET', 'HIDDEN_KEY'] as $key) {
-		define($key, $env[$key]);
+		define($key, getenv($key));
 	}
 } else {
 	require 'config.php';
@@ -18,9 +17,9 @@ $cache->load("folder=cache/");
 
 // Persistence
 function getDB() {
-	global $env;
-	if (isset($env['JAWSDB_URL'])) {
-		$parts = parse_url($env['JAWSDB_URL']);
+	$jawsdb = getenv('JAWSDB_URL');
+	if ($jawsdb) {
+		$parts = parse_url($jawsdb);
 		return new \DB\SQL($parts['scheme'] . ':' . 'host=' . $parts['host'] . ';port=' . $parts['port'] . ';dbname=' . substr($parts['path'], 1), $parts['user'] , $parts['pass']);
 	} else {
 		return new \DB\SQL('sqlite:../db/db.sqlite');
@@ -159,12 +158,12 @@ $f3->route('POST /login',
 );
 $f3->route('POST /start',
     function($f3) {
-	$db = getDB();
 	// Protected method
 	if (!$f3->exists('HEADERS.Authentication') || $f3->get('HEADERS.Authentication') !== HIDDEN_KEY) {
 		$f3->error(401);
 		return;
 	}
+	$db = getDB();
 	$rows = $db->exec(
 		"INSERT INTO presentation(name,started_at,ended_at,resumed_at,paused_at,remaining,likes,dislikes)
 		VALUES(
@@ -203,13 +202,13 @@ $f3->route('POST /stop',
 );
 $f3->route('POST /pause',
     function($f3) {
-	$db = getDB();
-	$currentPresentation = getCurrentPresentation($db);
 	// Protected method
 	if (!$f3->exists('HEADERS.Authentication') || $f3->get('HEADERS.Authentication') !== HIDDEN_KEY) {
 		$f3->error(401);
 		return;
 	}
+	$db = getDB();
+	$currentPresentation = getCurrentPresentation($db);
 	$time = time();
 	$remaining = calculateRemaining($currentPresentation, $time);
 	if ($currentPresentation) {

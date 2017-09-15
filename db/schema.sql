@@ -1,5 +1,5 @@
 CREATE TABLE presentation(
-	`id` int,
+	`id` INTEGER AUTO_INCREMENT,
 	`name` varchar(255),
 	`started_at` int,
 	`ended_at` int,

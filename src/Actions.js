@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {api} from './api';
+import { API_ENDPOINT } from './config';
 
 class Actions extends Component {
 
@@ -22,15 +23,15 @@ class Actions extends Component {
       } else if (this.props.status == "running") {
         return (
           <p>
-            <button type="button" className="btn btn-primary" onClick={this._pause.bind(this)}>Pause</button> &nbsp;
-            <button type="button" className="btn btn-primary" onClick={this._stop.bind(this)}>Stop</button>
+            <button type="button" className="btn btn-primary" onClick={api.private(this.props.apiKey).pause}>Pause</button> &nbsp;
+            <button type="button" className="btn btn-primary" onClick={api.private(this.props.apiKey).stop}>Stop</button>
           </p>
         );
       } else if (this.props.status == "paused") {
         return (
           <p>
-            <button type="button" className="btn btn-primary" onClick={this._resume.bind(this)}>Resume</button> &nbsp;
-            <button type="button" className="btn btn-primary" onClick={this._stop.bind(this)}>Stop</button>
+            <button type="button" className="btn btn-primary" onClick={api.private(this.props.apiKey).resume}>Resume</button> &nbsp;
+            <button type="button" className="btn btn-primary" onClick={api.private(this.props.apiKey).stop}>Stop</button>
           </p>
         );
       } else {

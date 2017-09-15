@@ -36,7 +36,7 @@ export const api = {
               method: "POST",
               headers: { Authentication: apiKey }
             }
-          ).then(() => console.log("Start sent!"));
+          ).then(() => console.log("Stop sent!"));
       },
 
       pause: () => {
