@@ -38,3 +38,19 @@ body {
   position: relative;
   z-index: 10;
 }
+
+footer {
+  position: absolute;
+  bottom: 12px;
+  width: 100%;
+}
+
+footer > div {
+  text-align: center;
+  font-size: 13px;
+}
+
+footer > div > a {
+  color: #000;
+  font-weight: bold;
+}
