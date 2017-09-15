@@ -27,9 +27,9 @@ class Hearts extends Component {
 
   render() {
     return (
-      <p>
+      <div>
         <div className="hearts"></div>
-      </p>
+      </div>
     );
   }
 }
