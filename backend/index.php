@@ -1,22 +1,40 @@
 <?php
-require 'vendor/autoload.php';
+require '../vendor/autoload.php';
 $f3 = \Base::instance();
 
-require 'config.php';
+if (getenv('SKIP_CONFIG_FILE')) {
+	foreach(['LIMIT_MAX_ITEMS_COUNT', 'LIMIT_MAX_ITEMS_AGE', 'HIDDEN_SECRET', 'HIDDEN_KEY'] as $key) {
+		define($key, getenv($key));
+	}
+} else {
+	require 'config.php';
+}
+
 
 // Temporal cache
 $cache = \Cache::instance();
 $cache->load("folder=cache/");
 
 // Persistence
-$db = new \DB\SQL('sqlite:db/db.sqlite');
-$rows = $db->exec(
-	'SELECT id,name,started_at,ended_at,paused_at,resumed_at,remaining,likes,dislikes
-	FROM presentation
-	WHERE ended_at is null
-	ORDER BY id DESC'
-);
-$currentPresentation = count($rows) > 0 ? $rows[0] : null;
+function getDB() {
+	$jawsdb = getenv('JAWSDB_URL');
+	if ($jawsdb) {
+		$parts = parse_url($jawsdb);
+		return new \DB\SQL($parts['scheme'] . ':' . 'host=' . $parts['host'] . ';port=' . $parts['port'] . ';dbname=' . substr($parts['path'], 1), $parts['user'] , $parts['pass']);
+	} else {
+		return new \DB\SQL('sqlite:../db/db.sqlite');
+	}
+}
+
+function getCurrentPresentation($db) {
+	$rows = $db->exec(
+		'SELECT id,name,started_at,ended_at,paused_at,resumed_at,remaining,likes,dislikes
+		FROM presentation
+		WHERE ended_at is null
+		ORDER BY id DESC'
+	);
+	return count($rows) > 0 ? $rows[0] : null;
+}
 
 function calculateRemaining($presentation, $at) {
 	if (!$presentation['paused_at']) {
@@ -42,10 +60,12 @@ function calculateStatus($presentation) {
 if (!$cache->exists('likes')) $cache->set('likes', []);
 if (!$cache->exists('dislikes')) $cache->set('dislikes', []);
 
+$f3->redirect('GET /', getenv('REACT_APP_API_ENDPOINT') . '/index.html');
 
 $f3->route('POST /like',
     function() {
-	global $db, $currentPresentation;
+	$db = getDB();
+	$currentPresentation = getCurrentPresentation($db);
         $cache = \Cache::instance();
 	$likes = $cache->get('likes');
 	$utime = intval(microtime(true) * 1000);
@@ -71,7 +91,8 @@ $f3->route('POST /like',
 );
 $f3->route('POST /dislike',
     function() {
-	global $db, $currentPresentation;
+	$db = getDB();
+	$currentPresentation = getCurrentPresentation($db);
         $cache = \Cache::instance();
 	$dislikes = $cache->get('dislikes');
 	$utime = intval(microtime(true) * 1000);
@@ -97,7 +118,8 @@ $f3->route('POST /dislike',
 );
 $f3->route('GET /updates/@since',
     function($f3, $params) {
-	global $currentPresentation;
+	$db = getDB();
+	$currentPresentation = getCurrentPresentation($db);
 	$utimeNow = intval(microtime(true) * 1000);
 	$utimeSince = intval($params['since']);
         $cache = \Cache::instance();
@@ -136,36 +158,35 @@ $f3->route('POST /login',
 );
 $f3->route('POST /start',
     function($f3) {
-	global $db;
 	// Protected method
 	if (!$f3->exists('HEADERS.Authentication') || $f3->get('HEADERS.Authentication') !== HIDDEN_KEY) {
 		$f3->error(401);
 		return;
 	}
+	$db = getDB();
 	$rows = $db->exec(
-		"INSERT INTO presentation(id,name,started_at,ended_at,resumed_at,paused_at,remaining,likes,dislikes)
+		"INSERT INTO presentation(name,started_at,ended_at,resumed_at,paused_at,remaining,likes,dislikes)
 		VALUES(
 			null,
-			null,
-			strftime('%s', 'now'),
+			:time,
 			null,
 			null,
 			null,
 			300,
 			0,
 			0
-		)"
+		)", [":time" => time()]
 	);
 	// Reset cache
         $cache = \Cache::instance();
         $cache->set("likes", []);
         $cache->set("dislikes", []);
-	
     }
 );
 $f3->route('POST /stop',
     function($f3) {
-	global $db, $currentPresentation;
+	$db = getDB();
+	$currentPresentation = getCurrentPresentation($db);
 	// Protected method
 	if (!$f3->exists('HEADERS.Authentication') || $f3->get('HEADERS.Authentication') !== HIDDEN_KEY) {
 		$f3->error(401);
@@ -173,20 +194,21 @@ $f3->route('POST /stop',
 	}
 	if ($currentPresentation) {
 		$db->exec(
-			"UPDATE presentation set ended_at = strftime('%s', 'now') WHERE id = :id",
-			[":id" => $currentPresentation['id']]
+			"UPDATE presentation set ended_at = :time WHERE id = :id",
+			[":id" => $currentPresentation['id'], ":time" => time()]
 		);
 	}
     }
 );
 $f3->route('POST /pause',
     function($f3) {
-	global $db, $currentPresentation;
 	// Protected method
 	if (!$f3->exists('HEADERS.Authentication') || $f3->get('HEADERS.Authentication') !== HIDDEN_KEY) {
 		$f3->error(401);
 		return;
 	}
+	$db = getDB();
+	$currentPresentation = getCurrentPresentation($db);
 	$time = time();
 	$remaining = calculateRemaining($currentPresentation, $time);
 	if ($currentPresentation) {
@@ -199,7 +221,8 @@ $f3->route('POST /pause',
 );
 $f3->route('POST /resume',
     function($f3) {
-	global $db, $currentPresentation;
+	$db = getDB();
+	$currentPresentation = getCurrentPresentation($db);
 	// Protected method
 	if (!$f3->exists('HEADERS.Authentication') || $f3->get('HEADERS.Authentication') !== HIDDEN_KEY) {
 		$f3->error(401);

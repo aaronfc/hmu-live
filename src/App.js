@@ -3,6 +3,7 @@ import './App.css';
 import Counter from './Counter.js'
 import Actions from './Actions.js'
 import Hearts from './Hearts.js'
+import { API_ENDPOINT } from './config';
 
 class App extends Component {
 
@@ -27,7 +28,7 @@ class App extends Component {
   }
 
   _loadData() {
-    fetch("http://localhost:8080/updates/" + this.state.lastUpdate.tick)
+    fetch(API_ENDPOINT + "/updates/" + this.state.lastUpdate.tick)
       .then(d => d.json())
       .then(d => {
         this.setState({lastUpdate: d})
@@ -38,12 +39,15 @@ class App extends Component {
   _login() {
       var password = prompt("Password?");
       if (password) {
-        fetch("http://localhost:8080/login", {method: "POST", body: JSON.stringify({username: 'admin', password: password})})
+        fetch(API_ENDPOINT + "/login", {method: "POST", body: JSON.stringify({username: 'admin', password: password})})
         .then(function(res){ if (!res.ok) { throw Error(res.statusText) } return res.json(); })
-        .then(function(data) { this.state.apiKey = data.apiKey; this.state.isAdmin = true; }.bind(this))
+        .then(function(data) {
+          this.setState({apiKey: data.apiKey, isAdmin: true});
+        }.bind(this))
         .catch(function(error) { alert('Wrong login information.'); console.log(error); });
       }
   }
+
 
 
   render() {
@@ -53,18 +57,18 @@ class App extends Component {
         <div className="App-header">
           <h2><i className="fa fa-circle text-danger Blink"></i> HMU Live</h2>
         </div>
-        <p className="App-intro">
+        <div className="App-intro">
           <Counter remaining={this.state.lastUpdate.remaining}/>
-        </p>
-        <p>
-          <Hearts ref={instance => {this.hearts = instance}}/>
-        </p>
-        <p>
+        </div>
+        <div>
           Likes: {this.state.lastUpdate.likes} | Dislikes: {this.state.lastUpdate.dislikes}
-        </p>
-        <p>
+        </div>
+        <div>
+          <Hearts ref={instance => {this.hearts = instance}}/>
+        </div>
+        <div className="actions">
           <Actions status={this.state.lastUpdate.status} isAdmin={this.state.isAdmin} loginCallback={this._login.bind(this)} apiKey={this.state.apiKey}/>
-        </p>
+        </div>
       </div>
     );
   }

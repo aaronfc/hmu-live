@@ -1,0 +1,10 @@
+{
+    "require": {
+        "bcosca/fatfree": "^3.6"
+    },
+    "scripts": {
+        "start": "cd backend && php -S 0.0.0.0:8080 index.php",
+        "start-build": "cd build && php -S 0.0.0.0:8080",
+        "compile": "npm run build && cp backend/*.php build/"
+    }
+}

@@ -33,3 +33,8 @@
 body {
     overflow:hidden;
 }
+
+.actions {
+  position: relative;
+  z-index: 10;
+}
